@@ -12,8 +12,12 @@ const Account = () => {
   });
   const [newName, setNewName] = useState('');
   const [newProfileImage, setNewProfileImage] = useState(null);
-  const [error, setError] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [error, setError] = useState(null);
   const token = getToken();
 
   useEffect(() => {
@@ -74,6 +78,69 @@ const Account = () => {
     }
   };
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+
+    // Validasi kata sandi
+    if (newPassword.length < 8) {
+      setError('New password must be at least 8 characters long');
+      return;
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      setError('New password must contain at least one uppercase letter');
+      return;
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      setError('New password must contain at least one lowercase letter');
+      return;
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      setError('New password must contain at least one symbol');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    setPasswordLoading(true); // Start loading
+
+    try {
+      await axios.put(
+        'https://sandbox.dibuiltadi.com/api/dashboard/common/v1/auth/password',
+        {
+          current_password: currentPassword,
+          new_password: newPassword,
+          new_password_confirmation: confirmNewPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      alert('Password updated successfully');
+    } catch (error) {
+      if (error.response && error.response.data) {
+        const errorMessage = error.response.data.message || error.response.data.error || 'Failed to update password';
+        setError(`Failed to update password: ${errorMessage}`);
+      } else {
+        setError('Failed to update password');
+      }
+      console.error('Error updating password:', error.response ? error.response.data : error.message);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
@@ -102,11 +169,7 @@ const Account = () => {
               <input type="file" onChange={(e) => setNewProfileImage(e.target.files[0])} className="mt-1" />
             </div>
 
-            <button
-              type="submit"
-              className="bg-blue-500 text-white p-2 rounded flex items-center"
-              disabled={isLoading} // Disable button when loading
-            >
+            <button type="submit" className="bg-blue-500 text-white p-2 rounded flex items-center" disabled={isLoading}>
               {isLoading && (
                 <svg className="w-5 h-5 mr-2 animate-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -116,6 +179,30 @@ const Account = () => {
               Update Profile
             </button>
           </form>
+
+          {/* Update Password Form */}
+          <form onSubmit={handleUpdatePassword} className="mt-8">
+            <div className="mb-4">
+              <label className="block text-gray-700">Current Password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="mt-1 p-2 border rounded w-full" required />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">New Password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1 p-2 border rounded w-full" required />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700">Confirm New Password</label>
+              <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="mt-1 p-2 border rounded w-full" required />
+            </div>
+
+            {error && <p className="text-red-500">{error}</p>}
+
+            <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={passwordLoading}>
+              {passwordLoading ? 'Updating...' : 'Update Password'}
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -123,5 +210,3 @@ const Account = () => {
 };
 
 export default Account;
-
-// alba
