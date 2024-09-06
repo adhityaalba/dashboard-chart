@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
-import { getToken } from '../utils/token'; 
+import { getToken } from '../utils/token';
+import { Navigate } from 'react-router-dom';
 
-const ITEMS_PER_PAGE = 10; 
+const ITEMS_PER_PAGE = 10;
 
 const Coupon = () => {
   const [coupons, setCoupons] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [editCoupon, setEditCoupon] = useState(null); 
+  const [editCoupon, setEditCoupon] = useState(null);
   const [newCoupon, setNewCoupon] = useState({ code: '', name: '', start_date: '', end_date: '' });
-  const [isAdding, setIsAdding] = useState(false); 
+  const [isAdding, setIsAdding] = useState(false);
   const token = getToken();
 
   // Fetch Coupons Data
@@ -27,7 +28,7 @@ const Coupon = () => {
       setCoupons(data);
       setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));
     } catch (error) {
-      setError('Failed to fetch coupons data');
+      setError('Gagal ambil data coupons ');
     }
   };
 
@@ -38,7 +39,7 @@ const Coupon = () => {
   // Calculate Paginated Data
   const paginatedCoupons = coupons.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  // Pagination 
+  // Pagination
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);

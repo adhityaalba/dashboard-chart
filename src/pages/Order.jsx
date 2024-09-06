@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal';
-import { getToken } from '../utils/token'; // Assume token is stored here
-
-const ITEMS_PER_PAGE = 10; // Number of items to display per page
+import { getToken } from '../utils/token';
+const ITEMS_PER_PAGE = 10;
 
 const Order = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [selectedOrder, setSelectedOrder] = useState(null); // State for selected order
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const token = getToken();
 
   // Fetch Orders Data
@@ -38,7 +37,7 @@ const Order = () => {
       });
       const data = response.data.items;
       setOrders(data);
-      setTotalPages(response.data.last_page); // Set total pages from API response
+      setTotalPages(response.data.last_page);
     } catch (error) {
       setError('Failed to fetch orders data');
     }
@@ -48,10 +47,9 @@ const Order = () => {
     fetchOrders();
   }, [currentPage, searchQuery]);
 
-  // Calculate Paginated Data
   const paginatedOrders = orders;
 
-  // Pagination Controls
+  // Pagination
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
@@ -61,7 +59,7 @@ const Order = () => {
   // Handle Search
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchOrders(1, searchQuery); // Reset to first page with new search query
+    fetchOrders(1, searchQuery);
   };
 
   // Fetch Order Details
@@ -74,7 +72,7 @@ const Order = () => {
       });
       setSelectedOrder(response.data);
     } catch (error) {
-      alert('Failed to fetch order details');
+      alert('Gagal ambil order details');
     }
   };
 
@@ -154,7 +152,6 @@ const Order = () => {
           </button>
         </div>
 
-        {/* Modal for Order Details */}
         <Modal isOpen={!!selectedOrder} onClose={closeModal} title="Order Details">
           {selectedOrder && (
             <div>
